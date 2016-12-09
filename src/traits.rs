@@ -6,7 +6,7 @@ use time::Timespec;
 type ErrFuture<T> = futures::Future<Item = T, Error = std::io::Error>;
 
 pub trait BlobCache {
-  fn get(key: &str) -> ErrFuture<Box<[u8]>>;
+  fn get(key: &str) -> ErrFuture<Vec<u8>>;
   fn get_all_keys() -> ErrFuture<Vec<String>>;
   fn get_created_at(key: &str, absoluteExpiration: Option<Timespec>) -> ErrFuture<Timespec>;
   fn insert(key : &str, value: &[u8]) -> ErrFuture<bool>;
