@@ -1,0 +1,9 @@
+[package]
+name = "akavache"
+version = "0.1.0"
+authors = ["Paul Betts <paul@paulbetts.org>"]
+
+[dependencies]
+futures = "0.1.6"
+futures-cpupool = "0.1.2"
+time = "0.1.35"
