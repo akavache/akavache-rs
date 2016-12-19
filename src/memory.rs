@@ -1,6 +1,7 @@
 use futures::future::*;
 
 use std::collections::HashMap;
+use std::fmt;
 use std::io::{Error, ErrorKind};
 use std::iter::FromIterator;
 use std::sync::Mutex;
@@ -8,6 +9,7 @@ use time;
 use time::Timespec;
 use traits::{BlobCache, ErrFuture};
 
+#[derive(Debug)]
 struct CacheEntry {
   created_at: Timespec,
   expires_at: Option<Timespec>,
@@ -107,5 +109,11 @@ impl<'a> BlobCache<'a> for InMemoryBlobCache {
   fn shutdown(&mut self) -> ErrFuture<bool> {
     let _l = self.lock.lock().unwrap();
     return done(Ok(true)).boxed();
+  }
+}
+
+impl fmt::Debug for InMemoryBlobCache {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    self.data.fmt(f)
   }
 }
