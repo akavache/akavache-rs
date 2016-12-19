@@ -1,10 +1,10 @@
 use futures::future::*;
-use time;
 
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::iter::FromIterator;
 use std::sync::Mutex;
+use time;
 use time::Timespec;
 use traits::{BlobCache, ErrFuture};
 
@@ -16,10 +16,10 @@ struct CacheEntry {
 
 impl CacheEntry {
   fn new(val: &[u8], created_at: Option<Timespec>, expires_at: Option<Timespec>) -> CacheEntry {
-    CacheEntry { 
+    CacheEntry {
       value: val.to_vec(),
       created_at: created_at.unwrap_or(time::now().to_timespec()),
-      expires_at: expires_at
+      expires_at: expires_at,
     }
   }
 }
@@ -30,9 +30,12 @@ pub struct InMemoryBlobCache {
 }
 
 impl InMemoryBlobCache {
-   pub fn new() -> InMemoryBlobCache {
-     return InMemoryBlobCache { data: HashMap::new(), lock: Mutex::new(false) };
-   }
+  pub fn new() -> InMemoryBlobCache {
+    return InMemoryBlobCache {
+      data: HashMap::new(),
+      lock: Mutex::new(false),
+    };
+  }
 }
 
 impl<'a> BlobCache<'a> for InMemoryBlobCache {
@@ -41,8 +44,9 @@ impl<'a> BlobCache<'a> for InMemoryBlobCache {
 
     if let Some(ce) = self.data.get(key) {
       match ce.expires_at {
-        Some(e) if e < time::now().to_timespec() => 
-          return failed(Error::new(ErrorKind::Other, "Key not found")).boxed(),
+        Some(e) if e < time::now().to_timespec() => {
+          return failed(Error::new(ErrorKind::Other, "Key not found")).boxed()
+        }
         _ => return done(Ok(ce.value.clone())).boxed(),
       }
     } else {
@@ -66,7 +70,7 @@ impl<'a> BlobCache<'a> for InMemoryBlobCache {
     }
   }
 
-  fn insert(&mut self, key : &str, value: &[u8], expires_at: Option<Timespec>) -> ErrFuture<bool> {
+  fn insert(&mut self, key: &str, value: &[u8], expires_at: Option<Timespec>) -> ErrFuture<bool> {
     let _l = self.lock.lock().unwrap();
 
     self.data.insert(key.to_owned(), CacheEntry::new(value, None, expires_at));
