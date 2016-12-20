@@ -40,6 +40,12 @@ impl InMemoryBlobCache {
   }
 }
 
+impl Default for InMemoryBlobCache {
+  fn default() -> InMemoryBlobCache {
+    return InMemoryBlobCache::new();
+  }
+}
+
 impl<'a> BlobCache<'a> for InMemoryBlobCache {
   fn get(&mut self, key: &str) -> ErrFuture<Vec<u8>> {
     let _l = self.lock.lock().unwrap();
@@ -73,6 +79,10 @@ impl<'a> BlobCache<'a> for InMemoryBlobCache {
   }
 
   fn insert(&mut self, key: &str, value: &[u8], expires_at: Option<Timespec>) -> ErrFuture<bool> {
+    if value.len() < 1 {
+      return failed(Error::new(ErrorKind::Other, "Value can't be empty")).boxed();
+    }
+
     let _l = self.lock.lock().unwrap();
 
     self.data.insert(key.to_owned(), CacheEntry::new(value, None, expires_at));
